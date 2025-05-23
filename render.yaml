@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: upx-laravel
+    env: docker
+    plan: free
+    branch: main
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    buildFilter:
+      paths:
+        - Dockerfile
+        - render.yaml
+        - .env.production
+        - app/**
+        - config/**
+        - routes/**
+        - public/**
+        - composer.*
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: base64:J79FuiG/qnNNfE/oX67yez1G05+lFO4Y5ufFfDMzlK4=
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://upx-laravel.onrender.com
+      - key: DB_CONNECTION
+        value: mongodb
+      - key: DB_DATABASE
+        value: BoschDataBase
+      - key: MONGODB_URI
+        value: mongodb+srv://lucaspaifer:2212@cluster0.aeemvbu.mongodb.net/BoschDataBase?retryWrites=true&w=majority
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: CACHE_DRIVER
+        value: file
