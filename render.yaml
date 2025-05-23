@@ -30,7 +30,7 @@ services:
       - key: DB_DATABASE
         value: BoschDataBase
       - key: MONGODB_URI
-        value: mongodb+srv://lucaspaifer:2212@cluster0.aeemvbu.mongodb.net/BoschDataBase?retryWrites=true&w=majority
+        value: mongodb://lucaspaifer:2212@cluster0-shard-00-00.aeemvbu.mongodb.net:27017,cluster0-shard-00-01.aeemvbu.mongodb.net:27017,cluster0-shard-00-02.aeemvbu.mongodb.net:27017/BoschDataBase?ssl=true&replicaSet=atlas-xxxx-shard-0&authSource=admin&retryWrites=true&w=majority
       - key: SESSION_DRIVER
         value: file
       - key: QUEUE_CONNECTION
