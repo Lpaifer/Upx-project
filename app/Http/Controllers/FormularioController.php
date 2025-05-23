@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Resposta;
-use illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Http;
 
 class FormularioController extends Controller
 {
@@ -47,7 +47,14 @@ class FormularioController extends Controller
 
         Resposta::create($dados);
 
-        Http::post('https://seu-webhook-url.com/endpoint', $dados);
+        $response = Http::post('https://n8ntech.unifast.com.br/webhook/upx/project', $dados);
+
+        if ($response->failed()) {
+            logger()->error('Falha ao enviar para N8N', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Peça Cadastrada com Sucesso!');
     }
