@@ -47,7 +47,7 @@ class FormularioController extends Controller
 
         Resposta::create($dados);
 
-        $response = Http::post('https://n8ntech.unifast.com.br/webhook/upx/project', $dados);
+        $response = Http::withoutVerifying()->post('https://n8ntech.unifast.com.br/webhook/upx/project', $dados);
 
         if ($response->failed()) {
             logger()->error('Falha ao enviar para N8N', [
