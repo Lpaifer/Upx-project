@@ -3,37 +3,25 @@ services:
     name: upx-laravel
     env: docker
     plan: free
-    branch: main
-    region: oregon
     dockerfilePath: ./Dockerfile
-    buildFilter:
-      paths:
-        - Dockerfile
-        - render.yaml
-        - .env.production
-        - app/**
-        - config/**
-        - routes/**
-        - public/**
-        - composer.*
+    buildCommand: ""  # Build é feito no Dockerfile
+    startCommand: "php artisan serve --host=0.0.0.0 --port=8000"
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        value: base64:p+P+3+H3GZfQtBnHhy2TVBt+hSP2MEAuvpfOZPy6q1I=
-      - key: APP_DEBUG
-        value: false
-      - key: APP_URL
-        value: https://upx-laravel.onrender.com
+        value: base64:p+P+3+H3GZfQtBnHhy2TVBt+hSP2MEAuvpfOZPy6q1I=  # Substitua se necessário
       - key: DB_CONNECTION
         value: mongodb
-      - key: DB_DATABASE
-        value: BoschDataBase
-      - key: MONGODB_URI
-        value: mongodb://lucaspaifer:2212@cluster0-shard-00-00.aeemvbu.mongodb.net:27017,cluster0-shard-00-01.aeemvbu.mongodb.net:27017,cluster0-shard-00-02.aeemvbu.mongodb.net:27017/BoschDataBase?ssl=true&replicaSet=atlas-xxxx-shard-0&authSource=admin&retryWrites=true&w=majority
-      - key: SESSION_DRIVER
-        value: file
-      - key: QUEUE_CONNECTION
-        value: sync
-      - key: CACHE_DRIVER
-        value: file
+      - key: DB_DSN
+        value: mongodb+srv://lucaspaifer:2212@cluster0.aeemvbu.mongodb.net/BoschDataBase?retryWrites=true&w=majority
+      - key: APP_URL
+        value: https://upx-laravel.onrender.com
+      - key: APP_LOCALE
+        value: pt-BR
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: noreply@bosch.com.br
+      - key: MAIL_FROM_NAME
+        value: Upx
