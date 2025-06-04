@@ -1,4 +1,12 @@
-# Etapa 1: Build Frontend com Vite (usando Node)
+# Etapa 1: Composer instala o PHP + Ziggy
+FROM composer:latest AS php-deps
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist
+
+# Etapa 2: Vite build (Node)
 FROM node:20-alpine AS node-builder
 
 WORKDIR /app
@@ -7,43 +15,35 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Copia o vendor para o build Vite conseguir ler Ziggy
+COPY --from=php-deps /app/vendor ./vendor
+
 RUN npm run build
 
-
-# Etapa 2: Laravel com PHP + MongoDB
+# Etapa 3: Laravel PHP com build finalizado
 FROM php:8.2-fpm
 
-# Instala dependências do sistema e do PHP
 RUN apt-get update && apt-get install -y \
     git unzip zip curl libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Instala MongoDB PHP driver
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
-# Instala Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Define diretório de trabalho
 WORKDIR /var/www/html
 
-# Copia os arquivos da aplicação
 COPY . .
-
-# Copia o build do Vite gerado anteriormente
+COPY --from=php-deps /app/vendor ./vendor
 COPY --from=node-builder /app/public/build public/build
-COPY --from=node-builder /app/.vite/ .vite/
+COPY --from=node-builder /app/.vite .vite/
 
-# Instala dependências do Laravel
-RUN composer install --optimize-autoloader --no-dev
-
-# Gera cache
+RUN composer dump-autoload --optimize
 RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
-# Ajusta permissões
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8000
 
-# Inicia Laravel
 CMD php artisan serve --host=0.0.0.0 --port=8000
