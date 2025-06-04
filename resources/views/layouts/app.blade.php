@@ -6,7 +6,7 @@
     <title>{{ config('app.name', 'Projeto UPX') }}</title>
 
     {{-- Estilo via Vite --}}
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.ts'])
 
     {{-- Fontes e Ícones opcionais --}}
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
