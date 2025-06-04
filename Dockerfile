@@ -17,12 +17,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Instala extensões PHP
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb
 
 # Copia o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copia o projeto e instala dependências (cache e vendor já prontos!)
+WORKDIR /var/www
+COPY . .
+
+RUN composer install --no-dev --prefer-dist \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # Etapa 2: Build do Frontend com Vite
 FROM node:20-alpine as node-builder
@@ -34,29 +43,35 @@ RUN npm install
 
 COPY . .
 
-# Copia vendor do builder (usado por Ziggy)
-COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY --from=builder /usr/bin/composer /usr/bin/composer
-
 # Executa o build
 RUN npm run build
 
 # Etapa 3: Final com PHP + Vite build + Mongo + Supervisor
 FROM php:8.4-fpm
 
-# Copia extensões e composer do builder
-COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-COPY --from=builder /usr/bin/composer /usr/bin/composer
-
-# Instala Supervisor e dependências
+# Instala dependências do sistema novamente (necessárias para rodar)
 RUN apt-get update && apt-get install -y \
-    supervisor \
-    nginx \
+    libpng-dev \
+    libzip-dev \
+    unzip \
+    git \
     curl \
+    nginx \
+    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Reinstala as extensões essenciais (compatíveis com o builder)
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb
+
+# Copia do builder
+COPY --from=builder /usr/bin/composer /usr/bin/composer
+COPY --from=builder /var/www /var/www
+
+# Copia assets do Node
+COPY --from=node-builder /app/public/build /var/www/public/build
 
 # Define user
 ARG user=laravel
@@ -65,27 +80,16 @@ RUN useradd -G www-data,root -u ${uid} -d /home/${user} ${user} \
     && mkdir -p /home/${user}/.composer \
     && chown -R ${user}:${user} /home/${user}
 
-# Permissões
+# Permissões e logs
 RUN mkdir -p /var/log/supervisor /var/www/storage/logs/supervisor \
     && chown -R laravel:www-data /var/log/supervisor /var/www/storage/logs \
     && chmod -R 775 /var/log/supervisor /var/www/storage/logs
 
 WORKDIR /var/www
 
-# PHP-FPM config
+# Configuração do PHP-FPM
 RUN echo "listen = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
     && echo "clear_env = no" >> /usr/local/etc/php-fpm.d/zz-docker.conf
-
-# Copia o projeto
-COPY . .
-COPY --from=node-builder /app/public/build public/build
-
-# Laravel otimiza
-RUN composer install --no-dev --prefer-dist \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && chown -R www-data:www-data storage bootstrap/cache
 
 USER ${user}
 
