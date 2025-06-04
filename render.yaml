@@ -3,6 +3,8 @@ services:
     name: upx-laravel
     env: docker
     plan: free
+    region: oregon
+    branch: main
     dockerfilePath: ./Dockerfile
     buildCommand: ""  # Build é feito no Dockerfile
     startCommand: "php artisan serve --host=0.0.0.0 --port=8000"
