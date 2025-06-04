@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    base: process.env.APP_ENV === 'production' ? '/build/' : '/',
     plugins: [
         laravel({
             input: ['resources/js/app.ts'],
@@ -27,3 +28,4 @@ export default defineConfig({
         },
     },
 });
+
