@@ -79,7 +79,6 @@ RUN echo "listen = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
 # Copia o projeto
 COPY . .
 COPY --from=node-builder /app/public/build public/build
-COPY --from=node-builder /app/.vite .vite/
 
 # Laravel otimiza
 RUN composer install --no-dev --prefer-dist \
