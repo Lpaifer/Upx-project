@@ -8,7 +8,7 @@ export default defineConfig({
     base: process.env.APP_ENV === 'production' ? '/build/' : '/',
     plugins: [
         laravel({
-            input: ['resources/js/app.ts'],
+            input: ['resources/js/app.ts', 'resources/css/app.css'],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
         }),
