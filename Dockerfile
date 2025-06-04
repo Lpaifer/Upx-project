@@ -1,4 +1,4 @@
-# Etapa 1: Build Frontend com Vite (Node.js)
+## Etapa 2: Build Frontend com Vite (Node.js)
 FROM node:20-alpine AS node-builder
 
 WORKDIR /app
@@ -6,9 +6,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Copia o vendor antes do build (isso resolve o problema!)
+COPY --from=php-deps /app/vendor ./vendor
+
 COPY . .
 
 RUN npm run build
+
 
 # Etapa 2: PHP + Laravel com MongoDB + frontend compilado
 FROM php:8.2-fpm
