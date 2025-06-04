@@ -2,8 +2,10 @@ FROM php:8.2-fpm
 
 # Instala dependências do sistema e do PHP
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip git curl libpng-dev libonig-dev libxml2-dev \
     libssl-dev pkg-config \
+    libzip-dev zip unzip git curl libpng-dev libonig-dev libxml2-dev \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Instala e ativa a extensão MongoDB com suporte SSL
