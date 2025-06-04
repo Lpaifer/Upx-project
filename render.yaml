@@ -7,7 +7,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        value: base64:p+P+3+H3GZfQtBnHhy2TVBt+hSP2MEAuvpfOZPy6q1I=  # Substitua se necessário
+        value: base64:BOx58QfUHhhr0Cg1T1aVyWniwCTYyMEd7fm/ibxofeM=  # Substitua se necessário
       - key: DB_CONNECTION
         value: mongodb
       - key: DB_DSN
