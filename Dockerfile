@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-enable mongodb \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Instala e ativa a extensão MongoDB com suporte SSL
-RUN pecl install mongodb && docker-php-ext-enable mongodb
-
 # Instala Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
